@@ -1,0 +1,73 @@
+---
+# Enable ALL the things! Except not really
+# misc-non-private-member-variables-in-classes: the options don't do anything
+ Checks: "*,
+  -google-readability-todo,\
+  -altera-*,\
+  -fuchsia-*,\
+  fuchsia-multiple-inheritance,\
+  -llvm-header-guard,\
+  -llvm-include-order,\
+  -llvmlibc-*,\
+  -misc-non-private-member-variables-in-classes,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-magic-numbers,
+  -readability-identifier-length
+  -readability-implicit-bool-conversion
+  -readability-redundant-access-specifiers
+  -bugprone-easily-swappable-parameters"
+WarningsAsErrors: ''
+CheckOptions:
+  - key: 'bugprone-argument-comment.StrictMode'
+    value: 'true'
+  - key: 'bugprone-argument-comment.CommentBoolLiterals'
+    value: 'true'
+  - key: 'bugprone-misplaced-widening-cast.CheckImplicitCasts'
+    value: 'true'
+  - key: 'bugprone-sizeof-expression.WarnOnSizeOfIntegerExpression'
+    value: 'true'
+  - key: 'bugprone-suspicious-string-compare.WarnOnLogicalNotComparison'
+    value: 'true'
+  - key: 'readability-simplify-boolean-expr.ChainedConditionalReturn'
+    value: 'true'
+  - key: 'readability-simplify-boolean-expr.ChainedConditionalAssignment'
+    value: 'true'
+  - key: 'readability-uniqueptr-delete-release.PreferResetCall'
+    value: 'true'
+  - key: 'cppcoreguidelines-init-variables.MathHeader'
+    value: '<cmath>'
+  - key: 'cppcoreguidelines-narrowing-conversions.PedanticMode'
+    value: 'true'
+  - key: 'readability-else-after-return.WarnOnUnfixable'
+    value: 'true'
+  - key: 'readability-else-after-return.WarnOnConditionVariables'
+    value: 'true'
+  - key: 'readability-inconsistent-declaration-parameter-name.Strict'
+    value: 'true'
+  - key: 'readability-qualified-auto.AddConstToQualified'
+    value: 'true'
+  - key: 'readability-redundant-access-specifiers.CheckFirstDeclaration'
+    value: 'true'
+
+  # IDENTIFIERS
+  - key: 'readability-identifier-naming.PrivateMethodPrefix'
+    value: '_'
+  - key: 'readability-identifier-naming.PrivateMethodCase'
+    value: 'lower_case'
+  - key: 'readability-identifier-naming.PublicMethodCase'
+    value: 'CamelCase'
+  - key: 'readability-identifier-naming.PrivateMemberPrefix'
+    value: 'm_'
+  - key: 'readability-identifier-naming.ProtectedMemberPrefix'
+    value: 'm_'
+  - key: 'readability-identifier-naming.ScopedEnumConstantCase'
+    value: 'lower_case'
+  - key: 'readability-identifier-naming.TemplateParameterCase'
+    value: 'CamelCase'
+  - key: 'readability-identifier-naming.TemplateTemplateParameterCase'
+    value: 'CamelCase'
+  - key: 'readability-identifier-naming.TypeTemplateParameterCase'
+    value: 'CamelCase'
+  - key: 'readability-identifier-naming.ValueTemplateParameterCase'
+    value: 'CamelCase'
+...
