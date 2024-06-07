@@ -1,5 +1,7 @@
 #include "NetworkClient.hpp"
 #include "Typedefs.hpp"
+#include <raylib.h>
+#include <raymath.h>
 
 namespace smp::network
 {
@@ -81,6 +83,16 @@ auto NetworkClient::Connect(const std::string& addrString) -> std::future<json>
 }
 void NetworkClient::SendMovement(IdType playerId, Vector2 nextPlayerCoords)
 {
+    // not quite thread safe, but we are in one for now
+    static Vector2 lastPos{ nextPlayerCoords };
+
+    if (Vector2Equals(lastPos, nextPlayerCoords) != 0)
+    {
+        return;
+    }
+
+	lastPos = nextPlayerCoords;
+
     json data = { { "type", "coords" },
                   { "payload",
                     {

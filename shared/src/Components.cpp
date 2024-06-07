@@ -19,10 +19,6 @@ auto CircleCollider::GetVelocity() const -> Vector2
 {
     return m_Velocity;
 };
-auto CircleCollider::GetNextPosition() const -> Vector2
-{
-    return Vector2Add(m_Position, m_Velocity);
-};
 auto CircleCollider::GetNextPosition(float velScale) const -> Vector2
 {
     return Vector2Add(m_Position, Vector2Scale(m_Velocity, velScale));
@@ -53,41 +49,48 @@ void PlayerController::Update()
     m_CurrentVelocity = { 0, 0 };
     if (IsKeyDown(KEY_W))
     {
-        m_CurrentVelocity.y = -m_PlayerSpeed * GetFrameTime();
+        m_CurrentVelocity.y = -m_PlayerSpeed;
     }
     if (IsKeyDown(KEY_S))
     {
-        m_CurrentVelocity.y = m_PlayerSpeed * GetFrameTime();
+        m_CurrentVelocity.y = m_PlayerSpeed;
     }
     if (IsKeyDown(KEY_D))
     {
-        m_CurrentVelocity.x = m_PlayerSpeed * GetFrameTime();
+        m_CurrentVelocity.x = m_PlayerSpeed;
     }
     if (IsKeyDown(KEY_A))
     {
-        m_CurrentVelocity.x = -m_PlayerSpeed * GetFrameTime();
+        m_CurrentVelocity.x = -m_PlayerSpeed;
     }
 }
 PlayerController::PlayerController(float speed)
     : m_PlayerSpeed{ speed }
 {
 }
-void collider::CollideCircles(CircleCollider& first, CircleCollider& second)
+auto collider::CollideCircles(CircleCollider& first, CircleCollider& second,
+                              float deltaTime) -> bool
 {
-    if (CheckCollisionCircles(first.GetNextPosition(), first.GetRadius(),
-                              second.GetNextPosition(), second.GetRadius()))
+    if (CheckCollisionCircles(
+            first.GetNextPosition(deltaTime), first.GetRadius(),
+            second.GetNextPosition(deltaTime), second.GetRadius()))
     {
         first.SetVelocity({ 0, 0 });
         second.SetVelocity({ 0, 0 });
+        return true;
     }
+    return false;
 }
-void collider::CollideCircleLine(CircleCollider& circle, LineCollider& line)
+auto collider::CollideCircleLine(CircleCollider& circle, LineCollider& line,
+                                 float deltaTime) -> bool
 {
-    if (CheckCollisionCircleLine(circle.GetPosition(), circle.GetRadius(),
-                                 line.Start, line.End))
+    if (CheckCollisionCircleLine(circle.GetNextPosition(deltaTime),
+                                 circle.GetRadius(), line.Start, line.End))
     {
         circle.SetVelocity({ 0, 0 });
+        return true;
     }
+    return false;
 }
 
 } // namespace smp::game

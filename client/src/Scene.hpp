@@ -7,6 +7,7 @@
 #include <cassert>
 #include <entt/entt.hpp>
 #include <memory>
+#include <queue>
 #include <raylib.h>
 #include <unordered_map>
 
@@ -38,8 +39,7 @@ public:
     void AddObject(IdType id, Args&&... args)
     {
         auto ecsId{ m_Registry->create(id) };
-        assert(ecsId == id); // all identifiers are in sync with
-                             // server, so we should match 
+        assert(ecsId == id);
 
         auto ptr{ std::make_unique<T>(id, this, std::forward<Args>(args)...) };
         m_Objects[ptr->GetId()] = std::move(ptr);
@@ -60,7 +60,8 @@ public:
 
     void RemoveObject(IdType id);
 
-    void ProcessIncomingMessage(json&& message);
+    auto ProcessIncomingMessage(const json& message) -> bool;
+    void ProcessMessages();
 
     void HandleEvent(ShootEvent event);
     void HandleEvent(KillEvent event);
@@ -79,6 +80,7 @@ private:
     Player* m_MainPlayer{ nullptr };
     // since we are using unordered_map, they won't invalidate
     std::vector<IdType> m_MarkedForDeletion;
+    std::list<nlohmann::json> m_MessageQueue;
 };
 
 } // namespace smp::game

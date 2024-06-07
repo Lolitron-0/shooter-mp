@@ -22,7 +22,9 @@ Scene::Scene()
 
     m_NetworkClient->SetMessageCallback(
         [this](json&& message)
-        { this->ProcessIncomingMessage(std::move(message)); });
+        { m_MessageQueue.push_front(std::move(message)); });
+    // m_NetworkClient->SetMessageCallback(
+    //     [this](json&& message) { this->ProcessIncomingMessage(message); });
 
     json gameStateJson = gameStateFuture.get();
     std::cout << gameStateJson << std::endl;
@@ -38,8 +40,6 @@ Scene::Scene()
             playerJson["y"].template get<float>(),
         });
     }
-	
-
 
     for (const auto& wallJson : gameStateJson["walls"])
     {
@@ -57,11 +57,6 @@ auto Scene::GetOptions() const -> SessionOptions
 }
 void Scene::Update()
 {
-    // for (auto& object : m_Objects)
-    // {
-    //     object.second->Update();
-    // }
-
     m_MainPlayer->Update();
 
     auto [mainPlayerController, mainPlayerCollider]{
@@ -76,15 +71,22 @@ void Scene::Update()
     {
         auto& wallCollider{ m_Registry->get<LineCollider>(wall) };
 
-        collider::CollideCircleLine(mainPlayerCollider, wallCollider);
+        collider::CollideCircleLine(mainPlayerCollider, wallCollider,
+                                    GetFrameTime());
     }
 
-    m_NetworkClient->SendMovement(m_MainPlayer->GetId(),
-                                  m_MainPlayer->GetNextPosition());
+    // important: process queue BEFORE sending new movement to avoid datagram
+    // overlaps (jitter)
+    ProcessMessages();
 
-    // remove objects after collision
+    m_NetworkClient->SendMovement(
+        m_MainPlayer->GetId(),
+        mainPlayerCollider.GetNextPosition(GetFrameTime()));
+
+    // remove queued objects after all iterations
     for (auto& idToDelete : m_MarkedForDeletion)
     {
+        m_Registry->destroy(idToDelete);
         m_Objects.erase(idToDelete);
     }
     m_MarkedForDeletion.clear();
@@ -99,9 +101,25 @@ void Scene::Draw() const
     DrawText(("FPS: " + std::to_string(GetFPS())).c_str(), 5, 5, 20, BLACK);
 }
 
-void Scene::ProcessIncomingMessage(json&& message)
+void Scene::ProcessMessages()
 {
-    // guaranteed to exist (right?)
+    for (auto it{ m_MessageQueue.begin() }; it != m_MessageQueue.end();)
+    {
+        if (this->ProcessIncomingMessage(*it))
+        {
+            it = m_MessageQueue.erase(it);
+        }
+        else
+        {
+            // we can't process it yet, let it hang
+            it++;
+        }
+    }
+}
+
+auto Scene::ProcessIncomingMessage(const json& message) -> bool
+{
+    // guaranteed to exist
     auto type{ message["type"].template get<std::string>() };
     auto payload = message["payload"]; // nlohmann/json doesn't like universal
                                        // initialization :(
@@ -109,6 +127,12 @@ void Scene::ProcessIncomingMessage(json&& message)
     if (type == "coords")
     {
         auto entityId{ payload["id"].template get<IdType>() };
+        if (!m_Registry->valid(entityId))
+        {
+            // just skip bad coordinates
+            return true;
+        }
+
         m_Registry->patch<CircleCollider>(
             entityId,
             [payload](auto& collider)
@@ -123,20 +147,41 @@ void Scene::ProcessIncomingMessage(json&& message)
     }
     else if (type == "shoot")
     {
+        auto id{ payload["bullet_id"].template get<IdType>() };
+
+        // an ugly way to check if entity exists
+        auto enttId{ m_Registry->create(id) };
+        if (enttId != id)
+        {
+            m_Registry->destroy(enttId);
+            // need to wait till destruction
+            return false;
+        }
+        m_Registry->destroy(enttId);
+
         Vector2 targetVec{ payload["target_x"].template get<float>(),
                            payload["target_y"].template get<float>() };
         Vector2 initialPos{ payload["bullet_x"].template get<float>(),
                             payload["bullet_y"].template get<float>() };
 
-        AddObject<Bullet>(payload["bullet_id"].template get<IdType>(),
-                          payload["shooter_id"].template get<IdType>(),
+        AddObject<Bullet>(id, payload["shooter_id"].template get<IdType>(),
                           initialPos, targetVec);
     }
+    else if (type == "destroy")
+    {
+        auto id{ payload["id"].template get<IdType>() };
+        if (id == m_MainPlayer->GetId())
+        {
+			m_NetworkClient = nullptr;
+            *reinterpret_cast<char*>(0); // дружеский прикол
+        }
+        RemoveObject(id);
+    }
+    return true;
 }
 
 void Scene::HandleEvent(ShootEvent event)
 {
-    // AddObject<Bullet>(1, event.Shooter, event.Target);
     m_NetworkClient->SendShoot(m_MainPlayer->GetId(), event.Target);
 }
 

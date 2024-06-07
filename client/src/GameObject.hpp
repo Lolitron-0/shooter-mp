@@ -27,9 +27,6 @@ public:
 
     virtual void Update() {};
     virtual void Draw() const = 0;
-    virtual void AfterCollision() {};
-
-    virtual void CollideWith(const std::shared_ptr<GameObject>& obj) {}
 
     [[nodiscard]] auto GetId() const -> IdType;
     [[nodiscard]] auto GetType() const -> GameObjectType;

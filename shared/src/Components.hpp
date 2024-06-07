@@ -38,7 +38,6 @@ public:
     [[nodiscard]] auto GetPosition() const -> Vector2;
     [[nodiscard]] auto GetRadius() const -> float;
     [[nodiscard]] auto GetVelocity() const -> Vector2;
-    [[nodiscard]] auto GetNextPosition() const -> Vector2;
     // overload for delta time
     [[nodiscard]] auto GetNextPosition(float velScale) const -> Vector2;
 
@@ -68,8 +67,8 @@ private:
 
 namespace collider
 {
-void CollideCircles(CircleCollider& first, CircleCollider& second);
-void CollideCircleLine(CircleCollider& circle, LineCollider& line);
+auto CollideCircles(CircleCollider& first, CircleCollider& second, float deltaTime) -> bool;
+auto CollideCircleLine(CircleCollider& circle, LineCollider& line, float deltaTime) -> bool;
 }; // namespace collider
 
 // entt allows filtering eninies by component type (probably ok since all such

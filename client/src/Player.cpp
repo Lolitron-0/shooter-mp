@@ -60,46 +60,12 @@ void Player::Draw() const
                 GREEN);
 }
 
-void Player::AfterCollision()
-{
-    auto& collider{ GetScene()->GetRegistry()->get<CircleCollider>(GetId()) };
-    collider.SetPosition(collider.GetNextPosition());
-}
 
-void Player::CollideWith(const std::shared_ptr<GameObject>& obj)
-{
-    auto& thisCollider{ GetScene()->GetRegistry()->get<CircleCollider>(
-        GetId()) };
-    switch (obj->GetType())
-    {
-    case GameObjectType::Wall:
-    {
-        auto collider{ obj->GetCollider<LineCollider>() };
-        auto radius{ GetScene()->GetOptions().PlayerRadius };
-        if (CheckCollisionCircleLine(thisCollider.GetNextPosition(), radius,
-                                     collider.Start, collider.End))
-        {
-            thisCollider.SetVelocity({ 0, 0 });
-        }
-        break;
-    }
-    case GameObjectType::Bullet:
-    case GameObjectType::Player:
-        break;
-    }
-}
 auto Player::GetPosition() const -> Vector2
 {
     return GetScene()
         ->GetRegistry()
         ->get<CircleCollider>(GetId())
         .GetPosition();
-}
-auto Player::GetNextPosition() const -> Vector2
-{
-    return GetScene()
-        ->GetRegistry()
-        ->get<CircleCollider>(GetId())
-        .GetNextPosition();
 }
 } // namespace smp::game

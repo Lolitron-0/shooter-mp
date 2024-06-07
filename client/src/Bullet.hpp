@@ -17,9 +17,6 @@ public:
 
     void Update() override;
     void Draw() const override;
-    void AfterCollision() override;
-
-    void CollideWith(const std::shared_ptr<GameObject>& obj) override;
 
 private:
     IdType m_OwnerId;

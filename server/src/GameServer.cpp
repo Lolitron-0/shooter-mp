@@ -157,6 +157,8 @@ void GameServer::UpdateGameState(float frameTime)
 {
     auto bulletsView{ m_Registry.view<game::BulletTag>() };
     auto wallsView{ m_Registry.view<game::LineCollider>() };
+    auto playersView{ m_Registry.view<game::PlayerTag>() };
+    json coordsMessage;
 
     for (const auto& bullet : bulletsView)
     {
@@ -165,19 +167,53 @@ void GameServer::UpdateGameState(float frameTime)
         for (const auto& wall : wallsView)
         {
             auto& wallCollider{ m_Registry.get<game::LineCollider>(wall) };
-            game::collider::CollideCircleLine(bulletCollider, wallCollider);
+            auto collided{ game::collider::CollideCircleLine(
+                bulletCollider, wallCollider, frameTime) };
+
+            if (collided)
+            {
+                json destroyMessage = { { "type", "destroy" },
+                                        { "payload", { { "id", bullet } } } };
+                SendMessageToAllClients(destroyMessage);
+                m_Registry.destroy(bullet);
+                goto skip_iter; // i think goto is cleaner than
+                                // break-flag-continue
+            }
+        }
+
+        for (const auto& player : playersView)
+        {
+            auto& playerCollider{ m_Registry.get<game::CircleCollider>(
+                player) };
+            auto collided{ game::collider::CollideCircles(
+                playerCollider, bulletCollider, frameTime) };
+
+            if (collided)
+            {
+                json destroyMessage = { { "type", "destroy" },
+                                        { "payload", { { "id", bullet } } } };
+                SendMessageToAllClients(destroyMessage);
+                destroyMessage = { { "type", "destroy" },
+                                   { "payload", { { "id", player } } } };
+                SendMessageToAllClients(destroyMessage);
+
+                m_Registry.destroy(bullet);
+                m_Registry.destroy(player);
+                goto skip_iter;
+            }
         }
 
         bulletCollider.SetPosition(bulletCollider.GetNextPosition(frameTime));
         // send coords message
-        json coordsMessage = { { "type", "coords" },
-                               { "payload",
-                                 {
-                                     { "id", bullet },
-                                     { "x", bulletCollider.GetPosition().x },
-                                     { "y", bulletCollider.GetPosition().y },
-                                 } } };
+        coordsMessage = { { "type", "coords" },
+                          { "payload",
+                            {
+                                { "id", bullet },
+                                { "x", bulletCollider.GetPosition().x },
+                                { "y", bulletCollider.GetPosition().y },
+                            } } };
         SendMessageToAllClients(coordsMessage);
+    skip_iter:;
     }
 }
 

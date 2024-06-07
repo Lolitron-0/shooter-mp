@@ -30,14 +30,14 @@ struct SessionOptions
         }
 
         // add bounding walls
-        // Walls.push_back(
-        //     { LineCollider{ Vector2{ 0, 0 }, Vector2{ WorldWidth, 0 } } });
-        // Walls.push_back({ LineCollider{ Vector2{ WorldWidth, 0 },
-        //                                 Vector2{ WorldWidth, WorldHeight } } });
-        // Walls.push_back({ LineCollider{ Vector2{ WorldWidth, WorldHeight },
-        //                                 Vector2{ 0, WorldHeight } } });
-        // Walls.push_back(
-        //     { LineCollider{ Vector2{ 0, WorldHeight }, Vector2{ 0, 0 } } });
+        Walls.push_back(
+            { LineCollider{ Vector2{ 0, 0 }, Vector2{ WorldWidth, 0 } } });
+        Walls.push_back({ LineCollider{ Vector2{ WorldWidth, 0 },
+                                        Vector2{ WorldWidth, WorldHeight } } });
+        Walls.push_back({ LineCollider{ Vector2{ WorldWidth, WorldHeight },
+                                        Vector2{ 0, WorldHeight } } });
+        Walls.push_back(
+            { LineCollider{ Vector2{ 0, WorldHeight }, Vector2{ 0, 0 } } });
     }
 
     [[nodiscard]] auto ToJSON() const -> nlohmann::json

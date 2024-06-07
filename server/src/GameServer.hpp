@@ -45,8 +45,7 @@ private:
     [[nodiscard]] auto GetCurrentStateJson() const -> json;
 
     static GameServer* s_CallbackInstance;
-    static void SteamNetConnectionStatusChangedCallback(
-        SteamNetConnectionStatusChangedCallback_t* info);
+    static void SteamNetConnectionStatusChangedCallback( SteamNetConnectionStatusChangedCallback_t* info);
 
     void PollConnectionStateChanges();
 
