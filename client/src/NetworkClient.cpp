@@ -13,7 +13,8 @@ NetworkClient::NetworkClient()
 NetworkClient::~NetworkClient()
 {
     m_Alive = false;
-    m_Interface->CloseConnection(m_Connection, 0, nullptr, false);
+    m_Interface->CloseConnection(
+        m_Connection, k_ESteamNetConnectionEnd_App_Generic, nullptr, false);
     m_PollingThread->join();
 }
 void NetworkClient::Run()
@@ -35,8 +36,11 @@ void NetworkClient::SetMessageCallback(
 {
     m_MessageCallback = callback;
 }
-auto NetworkClient::Connect(const std::string& addrString) -> std::future<json>
+auto NetworkClient::ConnectToGameServer()
+    -> std::future<json>
 {
+	assert(m_GameServerAddr != "");
+
     SteamNetworkingConfigValue_t opt{};
 
     opt.SetPtr(
@@ -45,14 +49,12 @@ auto NetworkClient::Connect(const std::string& addrString) -> std::future<json>
 
     SteamNetworkingIPAddr serverAddr{};
     serverAddr.Clear();
-    serverAddr.ParseString(addrString.c_str());
+    serverAddr.ParseString(m_GameServerAddr.c_str());
     m_Connection = m_Interface->ConnectByIPAddress(serverAddr, 1, &opt);
     if (m_Connection == k_HSteamNetConnection_Invalid)
     {
         throw std::runtime_error{ "Failed to connect to server" };
     }
-
-    m_Alive = true;
 
     auto playerIdFuture{ std::async(
         std::launch::async,
@@ -60,12 +62,13 @@ auto NetworkClient::Connect(const std::string& addrString) -> std::future<json>
         {
             while (m_Alive)
             {
-                auto messageOpt{ RecieveMessage() };
+                auto messageOpt{ RecieveMessage(m_Connection) };
 
                 if (messageOpt.has_value())
                 {
                     // ideally we'll need to recieve our ip and check if
-                    // this greeting is ours, but...
+                    // this greeting is ours, but we have no client-specific
+                    // info
                     auto type{
                         messageOpt.value()["type"].template get<std::string>()
                     };
@@ -81,6 +84,42 @@ auto NetworkClient::Connect(const std::string& addrString) -> std::future<json>
         }) };
     return playerIdFuture;
 }
+
+void NetworkClient::FindFreeRoom(const std::string& entryPointIp)
+{
+    std::cout << "Connecting to entrypoint\n";
+
+    SteamNetworkingIPAddr entryPointAddr{};
+    entryPointAddr.Clear();
+    entryPointAddr.ParseString(entryPointIp.c_str());
+
+    SteamNetworkingConfigValue_t opt{};
+    opt.SetPtr(
+        k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged,
+        reinterpret_cast<void*>(SteamNetConnectionStatusChangedCallback));
+
+    auto connection{ m_Interface->ConnectByIPAddress(entryPointAddr, 1, &opt) };
+    assert(connection != k_HSteamNetConnection_Invalid);
+
+    std::cout << "Searching for a free room...\n";
+    while (m_Alive)
+    {
+        auto messageOpt{ RecieveMessage(connection) };
+
+        if (!messageOpt.has_value())
+        {
+            continue;
+        }
+
+        std::cout << messageOpt.value() << std::endl;
+        auto host{ messageOpt.value()["ip"].template get<std::string>() };
+        auto port{ messageOpt.value()["port"].template get<int32_t>() };
+        m_GameServerAddr = host + ":" + std::to_string(port);
+        m_Interface->CloseConnection(connection, 0, nullptr, false);
+        return;
+    }
+}
+
 void NetworkClient::SendMovement(IdType playerId, Vector2 nextPlayerCoords)
 {
     // not quite thread safe, but we are in one for now
@@ -91,7 +130,7 @@ void NetworkClient::SendMovement(IdType playerId, Vector2 nextPlayerCoords)
         return;
     }
 
-	lastPos = nextPlayerCoords;
+    lastPos = nextPlayerCoords;
 
     json data = { { "type", "coords" },
                   { "payload",
@@ -121,11 +160,12 @@ void NetworkClient::SendMessage(const std::string& message)
         m_Connection, message.c_str(), message.size(),
         k_nSteamNetworkingSend_Reliable, nullptr);
 }
-auto NetworkClient::RecieveMessage() -> std::optional<json>
+auto NetworkClient::RecieveMessage(HSteamNetConnection connection)
+    -> std::optional<json>
 {
     ISteamNetworkingMessage* incomingMessage{ nullptr };
     auto numMessages{ m_Interface->ReceiveMessagesOnConnection(
-        m_Connection, &incomingMessage, 1) };
+        connection, &incomingMessage, 1) };
 
     if (numMessages == 0)
     {
@@ -150,7 +190,7 @@ void NetworkClient::PollIncomingMessages()
 {
     while (m_Alive /* have pending messages */)
     {
-        auto messageOpt{ RecieveMessage() };
+        auto messageOpt{ RecieveMessage(m_Connection) };
 
         if (!messageOpt.has_value()) // no new messages
         {

@@ -83,6 +83,8 @@ auto main(int argc, char** argv) -> int
 
     nlohmann::json configJson = nlohmann::json::parse(configFile);
     smp::game::SessionOptions sessionOptions{ configJson };
-    smp::server::GameServer server{ std::move(sessionOptions) };
+	sessionOptions.Name = serverName;
+    smp::server::GameServer server{ "127.0.0.1", 6379,
+                                    std::move(sessionOptions) };
     server.Run(ipString + ":" + portString);
 }

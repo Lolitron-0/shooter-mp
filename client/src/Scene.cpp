@@ -13,10 +13,10 @@
 namespace smp::game
 {
 
-Scene::Scene()
+Scene::Scene(std::unique_ptr<network::NetworkClient> networkClient)
+    : m_NetworkClient{ std::move(networkClient) }
 {
-    m_NetworkClient = std::make_unique<network::NetworkClient>();
-    auto gameStateFuture{ m_NetworkClient->Connect("127.0.0.1:25330") };
+    auto gameStateFuture{ m_NetworkClient->ConnectToGameServer() };
 
     m_Registry = std::make_shared<Registry>();
 
@@ -30,15 +30,17 @@ Scene::Scene()
     std::cout << gameStateJson << std::endl;
     gameStateJson = gameStateJson["payload"];
 
-    AddMainPlayer(gameStateJson["player_id"].template get<IdType>());
+    Vector2 spawnPos{ gameStateJson["player_x"].template get<float>(),
+                      gameStateJson["player_y"].template get<float>() };
+    AddMainPlayer(gameStateJson["player_id"].template get<IdType>(), spawnPos);
     for (const auto& playerJson : gameStateJson["players"])
     {
         auto id{ playerJson["id"].template get<IdType>() };
-        AddObject<Player>(id);
-        m_Registry->get<CircleCollider>(id).SetPosition({
+        Vector2 spawnPos{
             playerJson["x"].template get<float>(),
             playerJson["y"].template get<float>(),
-        });
+        };
+        AddObject<Player>(id, spawnPos);
     }
 
     for (const auto& wallJson : gameStateJson["walls"])
@@ -143,7 +145,9 @@ auto Scene::ProcessIncomingMessage(const json& message) -> bool
     }
     else if (type == "connection")
     {
-        AddObject<Player>(payload["id"].template get<IdType>());
+        Vector2 spawnPos{ payload["x"].template get<float>(),
+                          payload["y"].template get<float>() };
+        AddObject<Player>(payload["id"].template get<IdType>(), spawnPos);
     }
     else if (type == "shoot")
     {
@@ -172,7 +176,7 @@ auto Scene::ProcessIncomingMessage(const json& message) -> bool
         auto id{ payload["id"].template get<IdType>() };
         if (id == m_MainPlayer->GetId())
         {
-			m_NetworkClient = nullptr;
+            m_NetworkClient = nullptr;
             *reinterpret_cast<char*>(0); // дружеский прикол
         }
         RemoveObject(id);

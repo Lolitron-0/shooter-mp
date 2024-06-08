@@ -30,7 +30,7 @@ class Scene
     using Registry = entt::basic_registry<IdType>;
 
 public:
-    Scene();
+    explicit Scene(std::unique_ptr<network::NetworkClient> networkClient);
 
     void Update();
     void Draw() const;

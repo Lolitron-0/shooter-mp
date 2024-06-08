@@ -11,7 +11,7 @@ class Scene;
 class Player : public GameObject
 {
 public:
-    explicit Player(IdType id, Scene* parent);
+    Player(IdType id, Scene* parent, Vector2 initialPos);
 
     [[nodiscard]] auto GetPosition() const -> Vector2;
 

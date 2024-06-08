@@ -66,6 +66,7 @@ struct SessionOptions
     float PlayerSpeed{ 300.F };
     float BulletRadius{ 5.F };
     float BulletSpeed{ 500.F };
+    std::string Name;
     std::vector<WallEntitiy> Walls;
 
 public:

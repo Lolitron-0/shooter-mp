@@ -18,7 +18,4 @@ add_executable(
 
 target_link_libraries(${PROJECT_NAME} PRIVATE shooter-shared)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC GameNetworkingSockets
-                                             GameNetworkingSockets::static)
-
 target_link_libraries(${PROJECT_NAME} PUBLIC EnTT)

@@ -351,52 +351,62 @@
 },
 {
   "directory": "/home/niten/dev/shooter-mp/build",
-  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -g -I/usr/local/include -std=gnu++17 -o shared/CMakeFiles/shooter-shared.dir/src/Components.cpp.o -c /home/niten/dev/shooter-mp/shared/src/Components.cpp",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -g -I/usr/local/include -std=gnu++20 -o shared/CMakeFiles/shooter-shared.dir/src/Components.cpp.o -c /home/niten/dev/shooter-mp/shared/src/Components.cpp",
   "file": "/home/niten/dev/shooter-mp/shared/src/Components.cpp"
 },
 {
   "directory": "/home/niten/dev/shooter-mp/build",
-  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++17 -o client/CMakeFiles/shooter-client.dir/src/main.cpp.o -c /home/niten/dev/shooter-mp/client/src/main.cpp",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -g -I/usr/local/include -std=gnu++20 -o shared/CMakeFiles/shooter-shared.dir/src/ServerBase.cpp.o -c /home/niten/dev/shooter-mp/shared/src/ServerBase.cpp",
+  "file": "/home/niten/dev/shooter-mp/shared/src/ServerBase.cpp"
+},
+{
+  "directory": "/home/niten/dev/shooter-mp/build",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++20 -o client/CMakeFiles/shooter-client.dir/src/main.cpp.o -c /home/niten/dev/shooter-mp/client/src/main.cpp",
   "file": "/home/niten/dev/shooter-mp/client/src/main.cpp"
 },
 {
   "directory": "/home/niten/dev/shooter-mp/build",
-  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++17 -o client/CMakeFiles/shooter-client.dir/src/Player.cpp.o -c /home/niten/dev/shooter-mp/client/src/Player.cpp",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++20 -o client/CMakeFiles/shooter-client.dir/src/Player.cpp.o -c /home/niten/dev/shooter-mp/client/src/Player.cpp",
   "file": "/home/niten/dev/shooter-mp/client/src/Player.cpp"
 },
 {
   "directory": "/home/niten/dev/shooter-mp/build",
-  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++17 -o client/CMakeFiles/shooter-client.dir/src/Bullet.cpp.o -c /home/niten/dev/shooter-mp/client/src/Bullet.cpp",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++20 -o client/CMakeFiles/shooter-client.dir/src/Bullet.cpp.o -c /home/niten/dev/shooter-mp/client/src/Bullet.cpp",
   "file": "/home/niten/dev/shooter-mp/client/src/Bullet.cpp"
 },
 {
   "directory": "/home/niten/dev/shooter-mp/build",
-  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++17 -o client/CMakeFiles/shooter-client.dir/src/Wall.cpp.o -c /home/niten/dev/shooter-mp/client/src/Wall.cpp",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++20 -o client/CMakeFiles/shooter-client.dir/src/Wall.cpp.o -c /home/niten/dev/shooter-mp/client/src/Wall.cpp",
   "file": "/home/niten/dev/shooter-mp/client/src/Wall.cpp"
 },
 {
   "directory": "/home/niten/dev/shooter-mp/build",
-  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++17 -o client/CMakeFiles/shooter-client.dir/src/Scene.cpp.o -c /home/niten/dev/shooter-mp/client/src/Scene.cpp",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++20 -o client/CMakeFiles/shooter-client.dir/src/Scene.cpp.o -c /home/niten/dev/shooter-mp/client/src/Scene.cpp",
   "file": "/home/niten/dev/shooter-mp/client/src/Scene.cpp"
 },
 {
   "directory": "/home/niten/dev/shooter-mp/build",
-  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++17 -o client/CMakeFiles/shooter-client.dir/src/GameObject.cpp.o -c /home/niten/dev/shooter-mp/client/src/GameObject.cpp",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++20 -o client/CMakeFiles/shooter-client.dir/src/GameObject.cpp.o -c /home/niten/dev/shooter-mp/client/src/GameObject.cpp",
   "file": "/home/niten/dev/shooter-mp/client/src/GameObject.cpp"
 },
 {
   "directory": "/home/niten/dev/shooter-mp/build",
-  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++17 -o client/CMakeFiles/shooter-client.dir/src/NetworkClient.cpp.o -c /home/niten/dev/shooter-mp/client/src/NetworkClient.cpp",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++20 -o client/CMakeFiles/shooter-client.dir/src/NetworkClient.cpp.o -c /home/niten/dev/shooter-mp/client/src/NetworkClient.cpp",
   "file": "/home/niten/dev/shooter-mp/client/src/NetworkClient.cpp"
 },
 {
   "directory": "/home/niten/dev/shooter-mp/build",
-  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++17 -o server/CMakeFiles/shooter-server.dir/src/main.cpp.o -c /home/niten/dev/shooter-mp/server/src/main.cpp",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++20 -o server/CMakeFiles/shooter-server.dir/src/main.cpp.o -c /home/niten/dev/shooter-mp/server/src/main.cpp",
   "file": "/home/niten/dev/shooter-mp/server/src/main.cpp"
 },
 {
   "directory": "/home/niten/dev/shooter-mp/build",
-  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++17 -o server/CMakeFiles/shooter-server.dir/src/GameServer.cpp.o -c /home/niten/dev/shooter-mp/server/src/GameServer.cpp",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -I/home/niten/dev/shooter-mp/thirdparty/entt/src -g -I/usr/local/include -std=gnu++20 -o server/CMakeFiles/shooter-server.dir/src/GameServer.cpp.o -c /home/niten/dev/shooter-mp/server/src/GameServer.cpp",
   "file": "/home/niten/dev/shooter-mp/server/src/GameServer.cpp"
+},
+{
+  "directory": "/home/niten/dev/shooter-mp/build",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -g -I/usr/local/include -std=gnu++20 -o entrypoint/CMakeFiles/shooter-entrypoint.dir/src/main.cpp.o -c /home/niten/dev/shooter-mp/entrypoint/src/main.cpp",
+  "file": "/home/niten/dev/shooter-mp/entrypoint/src/main.cpp"
 }
 ]

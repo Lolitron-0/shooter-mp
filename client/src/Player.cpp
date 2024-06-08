@@ -10,11 +10,11 @@
 namespace smp::game
 {
 
-Player::Player(IdType id, Scene* parent)
+Player::Player(IdType id, Scene* parent, Vector2 initialPos)
     : GameObject{ id, parent, GameObjectType::Player }
 {
     GetScene()->GetRegistry()->emplace<CircleCollider>(
-        GetId(), Vector2{ 300, 300 }, // initial position
+        GetId(), initialPos, 
         GetScene()->GetOptions().PlayerRadius);
 }
 
@@ -59,7 +59,6 @@ void Player::Draw() const
     DrawCircleV(collider.GetPosition(), GetScene()->GetOptions().PlayerRadius,
                 GREEN);
 }
-
 
 auto Player::GetPosition() const -> Vector2
 {

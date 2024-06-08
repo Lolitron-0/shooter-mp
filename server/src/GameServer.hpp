@@ -1,7 +1,7 @@
 #pragma once
+#include "ServerBase.hpp"
 #include "SessionOptions.hpp"
 #include "Typedefs.hpp"
-#include "steam/steamnetworkingtypes.h"
 #include <cassert>
 #include <chrono>
 #include <entt/entt.hpp>
@@ -9,29 +9,28 @@
 #include <nlohmann/json.hpp>
 #include <raylib.h>
 #include <raymath.h>
-#include <steam/isteamnetworkingutils.h>
-#include <steam/steamnetworkingsockets.h>
 #include <string>
+#include <sw/redis++/redis++.h>
 #include <thread>
 #include <unordered_map>
-
-using json = nlohmann::json;
 
 namespace smp::server
 {
 
-class GameServer
+using namespace sw;
+
+class GameServer : public ServerBase
 {
 public:
-    explicit GameServer(game::SessionOptions options);
+    GameServer(const std::string& redisHost, int32_t redisPort,
+               game::SessionOptions options);
 
-    void Run(const std::string& addrIpv4);
+    virtual ~GameServer();
+
+    void Run(const std::string& addrIpv4) override;
 
 private:
     void ProcessMessage(json&& messageJson);
-
-    void SendMessageToConnection(HSteamNetConnection connection,
-                                 const json& message);
 
     void SendMessageToAllClients(const json& message);
 
@@ -39,22 +38,25 @@ private:
 
     void PollIncomingMessages();
 
-    void
-    OnConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t* info);
+    void OnConnectionStatusChanged(
+        SteamNetConnectionStatusChangedCallback_t* info) override;
+
+    void RegisterSelfInRedis();
+
+    void NotifyEntityDestruction(IdType id);
 
     [[nodiscard]] auto GetCurrentStateJson() const -> json;
 
-    static GameServer* s_CallbackInstance;
-    static void SteamNetConnectionStatusChangedCallback( SteamNetConnectionStatusChangedCallback_t* info);
-
-    void PollConnectionStateChanges();
-
 private:
     static constexpr float s_TickTimeSeconds{ 0.01667 };
+    static constexpr Vector2 s_PlayerSpawnPos{ 300, 300 };
+
+    std::unique_ptr<redis::Redis> m_RedisClient;
+    std::string m_Name;
+    std::string m_Host;
+    int32_t m_Port;
 
     std::unordered_map<HSteamNetConnection, IdType> m_ClientMap;
-    ISteamNetworkingSockets* m_Interface{ nullptr };
-    HSteamListenSocket m_ListenSocket{ k_HSteamListenSocket_Invalid };
     HSteamNetPollGroup m_PollGroup{ k_HSteamNetPollGroup_Invalid };
 
     game::SessionOptions m_SessionOptions;

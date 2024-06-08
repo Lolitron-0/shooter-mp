@@ -12,11 +12,25 @@
 namespace smp::server
 {
 
-GameServer* GameServer::s_CallbackInstance{ nullptr };
-
-GameServer::GameServer(game::SessionOptions options)
-    : m_SessionOptions{ std::move(options) }
+GameServer::GameServer(const std::string& redisHost, int32_t redisPort,
+                       game::SessionOptions options)
+    : m_Name(options.Name),
+      m_SessionOptions{ std::move(options) }
 {
+    try
+    {
+        redis::ConnectionOptions connOptions{};
+        connOptions.host = redisHost;
+        connOptions.port = redisPort;
+        connOptions.password = "mypassword"; // hehehe
+
+        m_RedisClient = std::make_unique<redis::Redis>(connOptions);
+    }
+    catch (const redis::Error& error)
+    {
+        std::cerr << error.what() << std::endl;
+    }
+
     for (auto& wall : m_SessionOptions.Walls)
     {
         wall.Id = m_Registry.create();
@@ -24,39 +38,48 @@ GameServer::GameServer(game::SessionOptions options)
     }
 }
 
+GameServer::~GameServer()
+{
+    m_Alive = false;
+    if (m_Interface)
+    {
+        m_Interface->DestroyPollGroup(m_PollGroup);
+    }
+    m_PollGroup = k_HSteamNetPollGroup_Invalid;
+    m_TickThread->join();
+
+    m_RedisClient->del(m_Name + ".endpoint");
+    m_RedisClient->del(m_Name + ".player_count");
+}
+
+void GameServer::RegisterSelfInRedis()
+{
+    json serverInfo = { { "ip", m_Host }, { "port", m_Port } };
+    m_RedisClient->set(m_Name + ".endpoint", serverInfo.dump());
+    m_RedisClient->set(m_Name + ".player_count", "0");
+}
+
 void GameServer::Run(const std::string& addrIpv4)
 {
-    m_TickStart = std::chrono::steady_clock::now();
-    m_Interface = SteamNetworkingSockets();
+    InitConnection(addrIpv4);
 
-    SteamNetworkingIPAddr serverLocalAddr{};
-    serverLocalAddr.Clear();
-    serverLocalAddr.ParseString(addrIpv4.c_str());
-    SteamNetworkingConfigValue_t opt{};
+    auto colonIdx{ addrIpv4.find(':') };
+    m_Host = addrIpv4.substr(0, colonIdx);
+    m_Port = std::stoi(addrIpv4.substr(colonIdx + 1));
+    RegisterSelfInRedis();
 
-    opt.SetPtr(
-        k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged,
-        reinterpret_cast<void*>(SteamNetConnectionStatusChangedCallback));
-
-    m_ListenSocket =
-        m_Interface->CreateListenSocketIP(serverLocalAddr, 1, &opt);
-
-    if (m_ListenSocket == k_HSteamListenSocket_Invalid)
-    {
-        std::cerr << "Failed to listen on " << addrIpv4 << '\n';
-    }
     m_PollGroup = m_Interface->CreatePollGroup();
     if (m_PollGroup == k_HSteamNetPollGroup_Invalid)
     {
         std::cerr << "Failed to listen on " << addrIpv4 << '\n';
     }
 
-    std::cout << "Listening on " << addrIpv4 << '\n';
+    m_TickStart = std::chrono::steady_clock::now();
 
     m_TickThread = std::make_unique<std::thread>(
         [this]()
         {
-            while (true)
+            while (m_Alive)
             {
                 auto now{ std::chrono::steady_clock::now() };
                 // in seconds
@@ -74,20 +97,12 @@ void GameServer::Run(const std::string& addrIpv4)
             }
         });
 
-    while (true)
+    while (m_Alive)
     {
 
         PollIncomingMessages();
         PollConnectionStateChanges();
     }
-
-    std::cout << "Shutting down...\n";
-
-    m_Interface->CloseListenSocket(m_ListenSocket);
-    m_ListenSocket = k_HSteamListenSocket_Invalid;
-
-    m_Interface->DestroyPollGroup(m_PollGroup);
-    m_PollGroup = k_HSteamNetPollGroup_Invalid;
 }
 void GameServer::ProcessMessage(json&& messageJson)
 {
@@ -137,14 +152,6 @@ void GameServer::ProcessMessage(json&& messageJson)
         m_Registry.emplace<game::BulletTag>(bulletId);
     }
 }
-void GameServer::SendMessageToConnection(HSteamNetConnection connection,
-                                         const json& message)
-{
-    auto messageString{ message.dump() };
-    m_Interface->SendMessageToConnection(
-        connection, messageString.c_str(), messageString.size(),
-        k_nSteamNetworkingSend_Reliable, nullptr);
-}
 void GameServer::SendMessageToAllClients(const json& message)
 {
     for (auto& pair : m_ClientMap)
@@ -190,15 +197,10 @@ void GameServer::UpdateGameState(float frameTime)
 
             if (collided)
             {
-                json destroyMessage = { { "type", "destroy" },
-                                        { "payload", { { "id", bullet } } } };
-                SendMessageToAllClients(destroyMessage);
-                destroyMessage = { { "type", "destroy" },
-                                   { "payload", { { "id", player } } } };
-                SendMessageToAllClients(destroyMessage);
-
+                NotifyEntityDestruction(bullet);
                 m_Registry.destroy(bullet);
-                m_Registry.destroy(player);
+                NotifyEntityDestruction(player);
+                // player will be actually destroyed on disconnect
                 goto skip_iter;
             }
         }
@@ -219,7 +221,7 @@ void GameServer::UpdateGameState(float frameTime)
 
 void GameServer::PollIncomingMessages()
 {
-    while (true)
+    while (m_Alive)
     {
         ISteamNetworkingMessage* incomingMessage{ nullptr };
         auto numMessages{ m_Interface->ReceiveMessagesOnPollGroup(
@@ -247,6 +249,14 @@ void GameServer::PollIncomingMessages()
         ProcessMessage(std::move(messageJson));
     }
 }
+
+void GameServer::NotifyEntityDestruction(IdType id)
+{
+    json destroyMessage = { { "type", "destroy" },
+                            { "payload", { { "id", id } } } };
+    SendMessageToAllClients(destroyMessage);
+}
+
 void GameServer::OnConnectionStatusChanged(
     SteamNetConnectionStatusChangedCallback_t* info)
 {
@@ -259,9 +269,14 @@ void GameServer::OnConnectionStatusChanged(
     case k_ESteamNetworkingConnectionState_ClosedByPeer:
     case k_ESteamNetworkingConnectionState_ProblemDetectedLocally:
     {
-        m_Registry.destroy(m_ClientMap[info->m_hConn]);
+        auto playerId{ m_ClientMap[info->m_hConn] };
+        m_Registry.destroy(playerId);
+
         m_ClientMap.erase(info->m_hConn);
         m_Interface->CloseConnection(info->m_hConn, 0, nullptr, false);
+
+        m_RedisClient->decr(m_Name + ".player_count");
+
         std::cout << "Disconnected this one: "
                   << std::string{ info->m_info.m_szConnectionDescription }
                   << '\n';
@@ -295,20 +310,26 @@ void GameServer::OnConnectionStatusChanged(
         auto newPlayerId{ m_Registry.create() };
 
         greetingJson["payload"]["player_id"] = newPlayerId;
+        greetingJson["payload"]["player_x"] = s_PlayerSpawnPos.x;
+        greetingJson["payload"]["player_y"] = s_PlayerSpawnPos.y;
         SendMessageToConnection(info->m_hConn,
                                 greetingJson); // we just need id for greeting
 
-        m_Registry.emplace<game::CircleCollider>(newPlayerId, Vector2{ 0, 0 },
+        // for simplicity spawn is fixed
+        m_Registry.emplace<game::CircleCollider>(newPlayerId, s_PlayerSpawnPos,
                                                  m_SessionOptions.PlayerRadius);
         m_Registry.emplace<game::PlayerTag>(newPlayerId);
         json newConnectionJson = { { "type", "connection" },
                                    { "payload",
                                      {
                                          { "id", newPlayerId },
+                                         { "x", s_PlayerSpawnPos.x },
+                                         { "y", s_PlayerSpawnPos.y },
                                      } } };
         SendMessageToAllClients(newConnectionJson);
 
         m_ClientMap[info->m_hConn] = newPlayerId;
+        m_RedisClient->incr(m_Name + ".player_count");
         std::cout << "Successful connection. Player id: " << newPlayerId
                   << '\n';
         break;
@@ -335,15 +356,5 @@ auto GameServer::GetCurrentStateJson() const -> json
     json state = m_SessionOptions.ToJSON();
     state["players"] = players;
     return state;
-}
-void GameServer::SteamNetConnectionStatusChangedCallback(
-    SteamNetConnectionStatusChangedCallback_t* info)
-{
-    s_CallbackInstance->OnConnectionStatusChanged(info);
-}
-void GameServer::PollConnectionStateChanges()
-{
-    s_CallbackInstance = this;
-    m_Interface->RunCallbacks();
 }
 } // namespace smp::server

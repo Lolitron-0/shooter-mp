@@ -1,4 +1,4 @@
-sudo apt-get install libprotobuf-dev protobuf-compiler libssl-dev libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
+sudo apt-get install libprotobuf-dev protobuf-compiler libssl-dev libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev libhiredis-dev
 
 git clone https://github.com/raysan5/raylib.git raylib
 cd raylib

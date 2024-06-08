@@ -1,11 +1,8 @@
-project(shooter-server)
+project(shooter-entrypoint)
 
-add_executable(${PROJECT_NAME} src/main.cpp src/GameServer.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE shooter-shared)
-
-# game state storage
-target_link_libraries(${PROJECT_NAME} PUBLIC EnTT)
 
 find_path(HIREDIS_HEADER hiredis)
 target_include_directories(${PROJECT_NAME} PUBLIC ${HIREDIS_HEADER})

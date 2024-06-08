@@ -1,8 +1,12 @@
+#include "NetworkClient.hpp"
 #include "Player.hpp"
 #include "Scene.hpp"
 #include "SessionOptions.hpp"
 #include "Wall.hpp"
+#include "steam/steamnetworkingtypes.h"
+#include <cassert>
 #include <cstdint>
+#include <memory>
 #include <raylib.h>
 
 static void DebugOutput(ESteamNetworkingSocketsDebugOutputType eType,
@@ -20,7 +24,6 @@ static void DebugOutput(ESteamNetworkingSocketsDebugOutputType eType,
 
 auto main() -> int
 {
-
     SteamDatagramErrMsg errMsg;
     if (!GameNetworkingSockets_Init(nullptr, errMsg))
     {
@@ -29,7 +32,10 @@ auto main() -> int
     SteamNetworkingUtils()->SetDebugOutputFunction(
         k_ESteamNetworkingSocketsDebugOutputType_Msg, DebugOutput);
 
-    smp::game::Scene scene;
+    auto networkClient{ std::make_unique<smp::network::NetworkClient>() };
+    networkClient->FindFreeRoom("127.0.0.1:32232");
+
+    smp::game::Scene scene{ std::move(networkClient) };
 
     InitWindow(smp::game::SessionOptions::WorldWidth,
                smp::game::SessionOptions::WorldHeight, "my game client hehehe");
