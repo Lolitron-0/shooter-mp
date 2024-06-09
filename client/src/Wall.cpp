@@ -9,7 +9,7 @@ namespace smp::game
 {
 
 Wall::Wall(IdType id, Scene* parent, const LineCollider& collider)
-    : GameObject{ id, parent, GameObjectType::Wall }
+    : GameObject{ id, parent }
 {
     GetScene()->GetRegistry()->emplace<LineCollider>(GetId(), collider);
 }

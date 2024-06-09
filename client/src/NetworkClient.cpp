@@ -1,5 +1,6 @@
 #include "NetworkClient.hpp"
 #include "Typedefs.hpp"
+#include <iostream>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -36,10 +37,9 @@ void NetworkClient::SetMessageCallback(
 {
     m_MessageCallback = callback;
 }
-auto NetworkClient::ConnectToGameServer()
-    -> std::future<json>
+auto NetworkClient::ConnectToGameServer() -> std::future<json>
 {
-	assert(m_GameServerAddr != "");
+    assert(m_GameServerAddr != "");
 
     SteamNetworkingConfigValue_t opt{};
 
@@ -203,7 +203,19 @@ void NetworkClient::PollIncomingMessages()
 void NetworkClient::OnConnectionStatusChanged(
     SteamNetConnectionStatusChangedCallback_t* info)
 {
-    // todo
+    switch (info->m_info.m_eState)
+    {
+    case k_ESteamNetworkingConnectionState_ProblemDetectedLocally:
+    case k_ESteamNetworkingConnectionState_ClosedByPeer:
+    {
+        m_Alive = false;
+        json netIssueMessage = { { "type", "network_error" },
+                                 { "payload",
+                                   { { "what", "server unavailable" } } } };
+        m_MessageCallback(std::move(netIssueMessage));
+        break;
+    }
+    }
 }
 void NetworkClient::SteamNetConnectionStatusChangedCallback(
     SteamNetConnectionStatusChangedCallback_t* info)

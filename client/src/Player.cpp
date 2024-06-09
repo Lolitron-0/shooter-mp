@@ -11,11 +11,10 @@ namespace smp::game
 {
 
 Player::Player(IdType id, Scene* parent, Vector2 initialPos)
-    : GameObject{ id, parent, GameObjectType::Player }
+    : GameObject{ id, parent }
 {
     GetScene()->GetRegistry()->emplace<CircleCollider>(
-        GetId(), initialPos, 
-        GetScene()->GetOptions().PlayerRadius);
+        GetId(), initialPos, GetScene()->GetOptions().PlayerRadius);
 }
 
 void Player::Update()

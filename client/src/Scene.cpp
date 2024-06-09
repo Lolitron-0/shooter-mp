@@ -6,6 +6,7 @@
 #include "Typedefs.hpp"
 #include "Wall.hpp"
 #include <cassert>
+#include <iostream>
 #include <memory>
 #include <raylib.h>
 #include <string>
@@ -196,6 +197,11 @@ auto Scene::ProcessIncomingMessage(const json& message) -> bool
         }
         RemoveObject(id);
     }
+    else if (type == "network_error")
+    {
+        std::cerr << payload["what"].template get<std::string>() << std::endl;
+        m_Alive = false;
+    }
     return true;
 }
 
@@ -215,8 +221,6 @@ void Scene::HandleEvent(KillEvent event)
     }
 }
 
-void Scene::HandleServerMessage(json&& message) {}
-
 void Scene::RemoveObject(IdType id)
 {
     m_MarkedForDeletion.push_back(id);
@@ -224,5 +228,9 @@ void Scene::RemoveObject(IdType id)
 auto Scene::GetRegistry() const -> std::shared_ptr<Registry>
 {
     return m_Registry;
+}
+auto Scene::IsAlive() const -> bool
+{
+    return m_Alive;
 }
 } // namespace smp::game

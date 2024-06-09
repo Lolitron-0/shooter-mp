@@ -13,17 +13,10 @@ namespace smp::game
 class Player;
 class Bullet;
 
-enum class GameObjectType : uint8_t
-{
-    Player,
-    Bullet,
-    Wall
-};
-
 class GameObject
 {
 public:
-    GameObject(IdType id, Scene* parent, GameObjectType type);
+    GameObject(IdType id, Scene* parent);
 
     virtual void Update() {};
     virtual void Draw() const = 0;
@@ -44,8 +37,6 @@ protected:
 private:
     IdType m_Id;
     Scene* m_Scene;
-    GameObjectType m_Type;
 };
-
 
 } // namespace smp::game

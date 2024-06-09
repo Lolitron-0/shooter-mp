@@ -41,8 +41,12 @@ GameServer::GameServer(const std::string& redisHost, int32_t redisPort,
 GameServer::~GameServer()
 {
     m_Alive = false;
-    if (m_Interface)
+    if (m_Interface != nullptr)
     {
+        for (auto clientPair : m_ClientMap)
+        {
+            m_Interface->CloseConnection(clientPair.first, 0, nullptr, false);
+        }
         m_Interface->DestroyPollGroup(m_PollGroup);
     }
     m_PollGroup = k_HSteamNetPollGroup_Invalid;

@@ -35,6 +35,8 @@ public:
     void Update();
     void Draw() const;
 
+    auto IsAlive() const -> bool;
+
     template <class T, class... Args>
     void AddObject(IdType id, Args&&... args)
     {
@@ -60,19 +62,20 @@ public:
 
     void RemoveObject(IdType id);
 
-    auto ProcessIncomingMessage(const json& message) -> bool;
-    void ProcessMessages();
-
     void HandleEvent(ShootEvent event);
     void HandleEvent(KillEvent event);
-
-    void HandleServerMessage(json&& message);
 
     [[nodiscard]] auto GetOptions() const -> SessionOptions;
     [[nodiscard]] auto GetRegistry() const -> std::shared_ptr<Registry>;
 
 private:
+    auto ProcessIncomingMessage(const json& message) -> bool;
+    void ProcessMessages();
+
+
+private:
     std::unique_ptr<network::NetworkClient> m_NetworkClient;
+    bool m_Alive{ true };
 
     ObjectsContainer m_Objects;
     std::shared_ptr<Registry> m_Registry;

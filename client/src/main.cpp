@@ -2,11 +2,10 @@
 #include "Player.hpp"
 #include "Scene.hpp"
 #include "SessionOptions.hpp"
-#include "Wall.hpp"
 #include "steam/steamnetworkingtypes.h"
 #include <boost/program_options.hpp>
 #include <cassert>
-#include <cstdint>
+#include <iostream>
 #include <memory>
 #include <raylib.h>
 
@@ -75,6 +74,11 @@ auto main(int argc, char** argv) -> int
 
     while (!WindowShouldClose())
     {
+        if (!scene.IsAlive())
+        {
+            break;
+        }
+
         scene.Update();
 
         BeginDrawing();

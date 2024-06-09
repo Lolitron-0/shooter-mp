@@ -10,9 +10,8 @@ auto GameObject::GetId() const -> IdType
     return m_Id;
 }
 
-GameObject::GameObject(IdType id, Scene* parent, GameObjectType type)
+GameObject::GameObject(IdType id, Scene* parent)
     : m_Scene{ parent },
-      m_Type{ type },
       m_Id{ id }
 {
 }
@@ -20,9 +19,5 @@ GameObject::GameObject(IdType id, Scene* parent, GameObjectType type)
 auto GameObject::GetScene() const -> Scene*
 {
     return m_Scene;
-}
-auto GameObject::GetType() const -> GameObjectType
-{
-    return m_Type;
 }
 } // namespace smp::game

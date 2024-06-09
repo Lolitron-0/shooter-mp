@@ -13,7 +13,7 @@ namespace smp::game
 
 Bullet::Bullet(IdType id, Scene* parent, IdType owner, Vector2 initialPosition,
                Vector2 target)
-    : GameObject{ id, parent, GameObjectType::Bullet },
+    : GameObject{ id, parent },
       m_OwnerId{ owner }
 {
     auto registry{ GetScene()->GetRegistry() };
