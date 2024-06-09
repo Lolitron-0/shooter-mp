@@ -1,2 +1,2 @@
 # shooter-mp
-Multiplayer shooter with server discovery
+Multiplayer shooter with service discovery
