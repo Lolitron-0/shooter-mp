@@ -287,6 +287,7 @@ void GameServer::OnConnectionStatusChanged(
     case k_ESteamNetworkingConnectionState_ProblemDetectedLocally:
     {
         auto playerId{ m_ClientMap[info->m_hConn] };
+        NotifyEntityDestruction(playerId);
         m_Registry.destroy(playerId);
 
         m_ClientMap.erase(info->m_hConn);
