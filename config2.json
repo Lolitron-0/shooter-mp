@@ -1,0 +1,29 @@
+{
+	"player_radius": 20,
+	"player_speed": 700,
+	"bullet_radius": 5,
+	"bullet_speed": 500,
+	"walls": [
+		{
+			"start": {
+				"x": 100,
+				"y": 100
+			},
+			"end": {
+				"x": 500,
+				"y": 100
+			}
+		},
+		{
+			"start": {
+				"x": 100,
+				"y": 500
+			},
+			"end": {
+				"x": 500,
+				"y": 500
+			}
+		}
+
+	]
+}

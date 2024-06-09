@@ -1,4 +1,5 @@
 #pragma once
+#include "Typedefs.hpp"
 #include <cmath>
 #include <nlohmann/json.hpp>
 #include <raylib.h>
@@ -67,18 +68,21 @@ private:
 
 namespace collider
 {
-auto CollideCircles(CircleCollider& first, CircleCollider& second, float deltaTime) -> bool;
-auto CollideCircleLine(CircleCollider& circle, LineCollider& line, float deltaTime) -> bool;
+auto CollideCircles(CircleCollider& first, CircleCollider& second,
+                    float deltaTime) -> bool;
+auto CollideCircleLine(CircleCollider& circle, LineCollider& line,
+                       float deltaTime) -> bool;
 }; // namespace collider
 
 // entt allows filtering eninies by component type (probably ok since all such
 // checks are static)
-class PlayerTag
+struct PlayerTag
 {
 };
 
-class BulletTag
+struct BulletTag
 {
+    IdType ShooterId; 
 };
 
 // inline auto CheckCollisionCircleLine(Vector2 center, float radius,

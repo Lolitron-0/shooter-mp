@@ -5,6 +5,7 @@
 #include <boost/program_options/value_semantic.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <cmath>
+#include <csignal>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -28,8 +29,18 @@ static void DebugOutput(ESteamNetworkingSocketsDebugOutputType eType,
     }
 }
 
+std::function<void(int)> ShutdownHandler = [](int) {};
+
+void SignalHandler(int sig)
+{
+    ShutdownHandler(sig);
+}
+
 auto main(int argc, char** argv) -> int
 {
+    std::signal(SIGINT, SignalHandler);
+    std::signal(SIGTERM, SignalHandler);
+
     SteamDatagramErrMsg errMsg;
     if (!GameNetworkingSockets_Init(nullptr, errMsg))
     {
@@ -82,9 +93,14 @@ auto main(int argc, char** argv) -> int
     }
 
     nlohmann::json configJson = nlohmann::json::parse(configFile);
+
     smp::game::SessionOptions sessionOptions{ configJson };
-	sessionOptions.Name = serverName;
+    sessionOptions.Name = serverName;
+
     smp::server::GameServer server{ "127.0.0.1", 6379,
                                     std::move(sessionOptions) };
+
+    ShutdownHandler = [&server](int) { server.Stop(); };
+
     server.Run(ipString + ":" + portString);
 }

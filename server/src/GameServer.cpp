@@ -124,10 +124,10 @@ void GameServer::ProcessMessage(json&& messageJson)
     {
         auto bulletId{ m_Registry.create() };
 
-        auto shooterPos{ m_Registry
-                             .get<game::CircleCollider>(
-                                 payload["shooter_id"].template get<IdType>())
-                             .GetPosition() };
+        auto shooterId{ payload["shooter_id"].template get<IdType>() };
+        auto shooterPos{
+            m_Registry.get<game::CircleCollider>(shooterId).GetPosition()
+        };
 
         Vector2 targetVec{ payload["target_x"].template get<float>(),
                            payload["target_y"].template get<float>() };
@@ -149,7 +149,7 @@ void GameServer::ProcessMessage(json&& messageJson)
         SendMessageToAllClients(messageJson);
 
         // include it in tick cycle only after creation message has been sent
-        m_Registry.emplace<game::BulletTag>(bulletId);
+        m_Registry.emplace<game::BulletTag>(bulletId, shooterId);
     }
 }
 void GameServer::SendMessageToAllClients(const json& message)
@@ -190,6 +190,11 @@ void GameServer::UpdateGameState(float frameTime)
 
         for (const auto& player : playersView)
         {
+            if (player == m_Registry.get<game::BulletTag>(bullet).ShooterId)
+            {
+                continue;
+            }
+
             auto& playerCollider{ m_Registry.get<game::CircleCollider>(
                 player) };
             auto collided{ game::collider::CollideCircles(
@@ -356,5 +361,9 @@ auto GameServer::GetCurrentStateJson() const -> json
     json state = m_SessionOptions.ToJSON();
     state["players"] = players;
     return state;
+}
+void GameServer::Stop()
+{
+    m_Alive = false;
 }
 } // namespace smp::server

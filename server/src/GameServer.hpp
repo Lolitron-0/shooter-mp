@@ -28,6 +28,7 @@ public:
     virtual ~GameServer();
 
     void Run(const std::string& addrIpv4) override;
+    void Stop();
 
 private:
     void ProcessMessage(json&& messageJson);
