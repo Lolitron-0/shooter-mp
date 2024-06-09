@@ -29,7 +29,6 @@ public:
     virtual void Draw() const = 0;
 
     [[nodiscard]] auto GetId() const -> IdType;
-    [[nodiscard]] auto GetType() const -> GameObjectType;
 
     template <class T>
     auto GetCollider() const -> T

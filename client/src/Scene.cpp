@@ -92,7 +92,7 @@ void Scene::Update()
                                     GetFrameTime());
     }
 
-    // important: process queue BEFORE sending new movement to avoid datagram
+    // important: process queue BEFORE sending new movement to avoid packet
     // overlaps (jitter)
     ProcessMessages();
 
