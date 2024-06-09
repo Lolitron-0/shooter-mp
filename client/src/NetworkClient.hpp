@@ -58,6 +58,7 @@ private:
     HSteamNetConnection m_Connection{ k_HSteamNetConnection_Invalid };
     bool m_Alive{ true };
     std::function<void(json&&)> m_MessageCallback{ [](json&&) {} };
+    std::chrono::steady_clock::time_point m_TickStart;
 };
 
 } // namespace smp::network

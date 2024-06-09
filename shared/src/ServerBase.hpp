@@ -14,6 +14,8 @@ public:
     ~ServerBase();
     virtual void Run(const std::string& addrIpv4) = 0;
 
+    static constexpr int32_t TickTimeMicroseconds{ 16667 };
+
 protected:
     void InitConnection(const std::string& addrIpv4);
 

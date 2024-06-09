@@ -50,7 +50,6 @@ GameServer::~GameServer()
         m_Interface->DestroyPollGroup(m_PollGroup);
     }
     m_PollGroup = k_HSteamNetPollGroup_Invalid;
-    m_TickThread->join();
 
     m_RedisClient->del(m_Name + ".endpoint");
     m_RedisClient->del(m_Name + ".player_count");
@@ -80,32 +79,24 @@ void GameServer::Run(const std::string& addrIpv4)
 
     m_TickStart = std::chrono::steady_clock::now();
 
-    m_TickThread = std::make_unique<std::thread>(
-        [this]()
-        {
-            while (m_Alive)
-            {
-                auto now{ std::chrono::steady_clock::now() };
-                // in seconds
-                std::chrono::duration<float> frameTime{ now - m_TickStart };
-
-                // tickrate 60Hz
-                if (frameTime.count() < s_TickTimeSeconds)
-                {
-                    continue;
-                }
-
-                m_TickStart = std::chrono::steady_clock::now();
-
-                UpdateGameState(frameTime.count());
-            }
-        });
-
     while (m_Alive)
     {
+        auto now{ std::chrono::steady_clock::now() };
+        std::chrono::duration<float> frameTime{ now - m_TickStart };
+        m_TickStart = std::chrono::steady_clock::now();
 
         PollIncomingMessages();
         PollConnectionStateChanges();
+        UpdateGameState(frameTime.count());
+
+        now = std::chrono::steady_clock::now();
+
+        std::chrono::duration<float, std::micro> sleepTime{
+            std::chrono::microseconds{
+                server::ServerBase::TickTimeMicroseconds } -
+            (now - m_TickStart)
+        };
+        std::this_thread::sleep_for(sleepTime);
     }
 }
 void GameServer::ProcessMessage(json&& messageJson)
@@ -119,10 +110,9 @@ void GameServer::ProcessMessage(json&& messageJson)
             payload["id"].template get<IdType>(),
             [payload](auto& collider)
             {
-                collider.SetPosition({ payload["x"].template get<float>(),
+                collider.SetVelocity({ payload["x"].template get<float>(),
                                        payload["y"].template get<float>() });
             });
-        SendMessageToAllClients(messageJson);
     }
     else if (type == "shoot")
     {
@@ -166,18 +156,19 @@ void GameServer::SendMessageToAllClients(const json& message)
 
 void GameServer::UpdateGameState(float frameTime)
 {
-    auto bulletsView{ m_Registry.view<game::BulletTag>() };
+    auto bulletsView{
+        m_Registry.view<game::BulletTag, game::CircleCollider>()
+    };
     auto wallsView{ m_Registry.view<game::LineCollider>() };
-    auto playersView{ m_Registry.view<game::PlayerTag>() };
+    auto playersView{
+        m_Registry.view<game::PlayerTag, game::CircleCollider>()
+    };
     json coordsMessage;
 
-    for (const auto& bullet : bulletsView)
+    for (auto&& [bullet, bulletTag, bulletCollider] : bulletsView.each())
     {
-        auto& bulletCollider{ m_Registry.get<game::CircleCollider>(bullet) };
-
-        for (const auto& wall : wallsView)
+        for (auto&& [wall, wallCollider] : wallsView.each())
         {
-            auto& wallCollider{ m_Registry.get<game::LineCollider>(wall) };
             auto collided{ game::collider::CollideCircleLine(
                 bulletCollider, wallCollider, frameTime) };
 
@@ -192,15 +183,13 @@ void GameServer::UpdateGameState(float frameTime)
             }
         }
 
-        for (const auto& player : playersView)
+        for (auto&& [player, playerCollider] : playersView.each())
         {
             if (player == m_Registry.get<game::BulletTag>(bullet).ShooterId)
             {
                 continue;
             }
 
-            auto& playerCollider{ m_Registry.get<game::CircleCollider>(
-                player) };
             auto collided{ game::collider::CollideCircles(
                 playerCollider, bulletCollider, frameTime) };
 
@@ -208,8 +197,8 @@ void GameServer::UpdateGameState(float frameTime)
             {
                 NotifyEntityDestruction(bullet);
                 m_Registry.destroy(bullet);
-                NotifyEntityDestruction(player);
-                // player will be actually destroyed on disconnect
+                playerCollider.SetPosition(s_PlayerSpawnPos);
+                playerCollider.SetVelocity({ 0, 0 });
                 goto skip_iter;
             }
         }
@@ -225,6 +214,25 @@ void GameServer::UpdateGameState(float frameTime)
                             } } };
         SendMessageToAllClients(coordsMessage);
     skip_iter:;
+    }
+
+    for (auto&& [player, playerCollider] : playersView.each())
+    {
+        for (auto&& [wall, wallCollider] : wallsView.each())
+        {
+            game::collider::CollideCircleLine(playerCollider, wallCollider,
+                                              frameTime);
+        }
+
+        playerCollider.SetPosition(playerCollider.GetNextPosition(frameTime));
+        coordsMessage = { { "type", "coords" },
+                          { "payload",
+                            {
+                                { "id", player },
+                                { "x", playerCollider.GetPosition().x },
+                                { "y", playerCollider.GetPosition().y },
+                            } } };
+        SendMessageToAllClients(coordsMessage);
     }
 }
 

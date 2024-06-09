@@ -49,7 +49,6 @@ private:
     [[nodiscard]] auto GetCurrentStateJson() const -> json;
 
 private:
-    static constexpr float s_TickTimeSeconds{ 0.01667 };
     static constexpr Vector2 s_PlayerSpawnPos{ 300, 300 };
 
     std::unique_ptr<redis::Redis> m_RedisClient;
@@ -64,7 +63,6 @@ private:
     entt::basic_registry<IdType> m_Registry;
 
     std::chrono::steady_clock::time_point m_TickStart;
-    std::unique_ptr<std::thread> m_TickThread;
 };
 
 } // namespace smp::server

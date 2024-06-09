@@ -40,14 +40,25 @@ EntryServer::EntryServer(const std::string& redisHost, int32_t redisPort)
 
                         for (const auto& key : keys)
                         {
-                            if (key.ends_with(".endpoint"))
-                            {
-                                auto valueOpt{ m_RedisClient->get(key) };
-                                assert(valueOpt.has_value());
+                            auto dotIdx{ key.find('.') };
+                            auto serverName{ key.substr(0, dotIdx) };
+                            auto keyType{ key.substr(dotIdx + 1) };
 
-                                json serverState =
-                                    json::parse(valueOpt.value());
-                                m_AvailableServersMap[key] = serverState;
+                            auto valueOpt{ m_RedisClient->get(key) };
+                            assert(valueOpt.has_value());
+
+                            m_AvailableServersMap[serverName];
+                            if (keyType == "player_count")
+                            {
+                                m_AvailableServersMap[serverName]
+                                                     ["player_count"] =
+                                                         std::stoi(
+                                                             valueOpt.value());
+                            }
+                            else
+                            {
+                                m_AvailableServersMap[serverName].merge_patch(
+                                    json::parse(valueOpt.value()));
                             }
                         }
                     }
@@ -77,6 +88,7 @@ void EntryServer::Run(const std::string& addrIpv4)
     while (m_Alive)
     {
         PollConnectionStateChanges();
+        std::this_thread::sleep_for(std::chrono::seconds{ 1 });
     }
 }
 void EntryServer::OnConnectionStatusChanged(
@@ -120,37 +132,26 @@ void EntryServer::OnConnectionStatusChanged(
         {
             m_ServerMapMutex.lock();
 
-            // could have sorted through redis, but game won't have so much
-            // servers anyways (and redis++ doesn't have convinient interface)
-            auto minPlayersIt{ m_AvailableServersMap.end() };
-            int32_t minPlayerCount{ std::numeric_limits<int32_t>::max() };
-
-            for (auto it{ m_AvailableServersMap.begin() };
-                 it != m_AvailableServersMap.end(); it++)
-            {
-                // get the server-name.player_count value
-                auto token{ it->first.substr(0, it->first.find('.')) +
-                            ".player_count" };
-                auto opt{ m_RedisClient->get(token) };
-
-                assert(opt.has_value());
-
-                auto playerCount{ std::stoi(opt.value()) };
-                if (playerCount < minPlayerCount)
-
+            auto suitableServerIt{ std::min_element(
+                m_AvailableServersMap.begin(), m_AvailableServersMap.end(),
+                [](auto a, auto b)
                 {
-                    minPlayersIt = it;
-                    minPlayerCount = playerCount;
-                }
+                    std::cout
+                        << (a.second["player_count"].template get<int32_t>() <
+                            b.second["player_count"].template get<int32_t>());
+                    return a.second["player_count"].template get<int32_t>() <
+                           b.second["player_count"].template get<int32_t>();
+                }) };
+
+            if (suitableServerIt != m_AvailableServersMap.end())
+            {
+                SendMessageToConnection(info->m_hConn,
+                                        suitableServerIt->second);
+                m_ServerMapMutex.unlock();
+                break;
             }
 
             m_ServerMapMutex.unlock();
-
-            if (minPlayersIt != m_AvailableServersMap.end())
-            {
-                SendMessageToConnection(info->m_hConn, minPlayersIt->second);
-                break;
-            }
 
             std::cout << "No suitable server :( Retrying...\n";
             std::this_thread::sleep_for(std::chrono::seconds{ 1 });

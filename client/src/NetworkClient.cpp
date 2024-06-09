@@ -1,4 +1,5 @@
 #include "NetworkClient.hpp"
+#include "ServerBase.hpp"
 #include "Typedefs.hpp"
 #include <iostream>
 #include <raylib.h>
@@ -27,8 +28,19 @@ void NetworkClient::Run()
         {
             while (m_Alive)
             {
+                m_TickStart = std::chrono::steady_clock::now();
+
                 PollIncomingMessages();
                 PollConnectionStateChanges();
+
+                auto now{ std::chrono::steady_clock::now() };
+
+                std::chrono::duration<float, std::micro> sleepTime{
+                    std::chrono::microseconds{
+                        server::ServerBase::TickTimeMicroseconds } -
+                    (now - m_TickStart)
+                };
+                std::this_thread::sleep_for(sleepTime);
             }
         });
 }
@@ -108,6 +120,7 @@ void NetworkClient::FindFreeRoom(const std::string& entryPointIp)
 
         if (!messageOpt.has_value())
         {
+            std::this_thread::sleep_for(std::chrono::seconds{ 2 });
             continue;
         }
 
@@ -122,13 +135,13 @@ void NetworkClient::FindFreeRoom(const std::string& entryPointIp)
 
 void NetworkClient::SendMovement(IdType playerId, Vector2 nextPlayerCoords)
 {
-    // not quite thread safe, but we are in one for now
+    // not quite thread safe, but we are in one thread for now
     static Vector2 lastPos{ nextPlayerCoords };
 
-    if (Vector2Equals(lastPos, nextPlayerCoords) != 0)
-    {
-        return;
-    }
+    // if (Vector2Equals(lastPos, nextPlayerCoords) != 0)
+    // {
+    //     return;
+    // }
 
     lastPos = nextPlayerCoords;
 

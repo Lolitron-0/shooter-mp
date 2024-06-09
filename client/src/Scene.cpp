@@ -23,7 +23,7 @@ Scene::Scene(std::unique_ptr<network::NetworkClient> networkClient)
 
     m_NetworkClient->SetMessageCallback(
         [this](json&& message)
-        { m_MessageQueue.push_front(std::move(message)); });
+        { m_MessageQueue.push_back(std::move(message)); });
 
     json gameStateJson = gameStateFuture.get();
     std::cout << gameStateJson << std::endl;
@@ -75,6 +75,10 @@ auto Scene::GetOptions() const -> SessionOptions
 }
 void Scene::Update()
 {
+    // important: process queue BEFORE sending new movement to avoid packet
+    // overlaps (jitter)
+    ProcessMessages();
+
     m_MainPlayer->Update();
 
     auto [mainPlayerController, mainPlayerCollider]{
@@ -84,22 +88,8 @@ void Scene::Update()
     mainPlayerController.Update();
     mainPlayerCollider.SetVelocity(mainPlayerController.GetCurrentVelocity());
 
-    auto wallView{ m_Registry->view<LineCollider>() };
-    for (auto wall : wallView)
-    {
-        auto& wallCollider{ m_Registry->get<LineCollider>(wall) };
-
-        collider::CollideCircleLine(mainPlayerCollider, wallCollider,
-                                    GetFrameTime());
-    }
-
-    // important: process queue BEFORE sending new movement to avoid packet
-    // overlaps (jitter)
-    ProcessMessages();
-
-    m_NetworkClient->SendMovement(
-        m_MainPlayer->GetId(),
-        mainPlayerCollider.GetNextPosition(GetFrameTime()));
+    m_NetworkClient->SendMovement(m_MainPlayer->GetId(),
+                                  mainPlayerCollider.GetVelocity());
 
     // remove queued objects after all iterations
     for (auto& idToDelete : m_MarkedForDeletion)
@@ -190,11 +180,11 @@ auto Scene::ProcessIncomingMessage(const json& message) -> bool
     else if (type == "destroy")
     {
         auto id{ payload["id"].template get<IdType>() };
-        if (id == m_MainPlayer->GetId())
-        {
-            m_NetworkClient = nullptr;
-            *reinterpret_cast<char*>(0); // дружеский прикол
-        }
+        // if (id == m_MainPlayer->GetId())
+        // {
+        //     m_NetworkClient = nullptr;
+        //     *reinterpret_cast<char*>(0); // дружеский прикол
+        // }
         RemoveObject(id);
     }
     else if (type == "network_error")
