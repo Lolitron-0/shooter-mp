@@ -358,8 +358,23 @@ auto GameServer::GetCurrentStateJson() const -> json
                             { "y", playerCollider.GetPosition().y } });
     }
 
+    auto bulletsView{
+        m_Registry.view<game::BulletTag, game::CircleCollider>()
+    };
+    std::vector<json> bullets;
+    for (auto&& [entity, tag, collider] : bulletsView.each())
+    {
+        bullets.push_back({ { "id", entity },
+                            { "x", collider.GetPosition().x },
+                            { "y", collider.GetPosition().y },
+                            { "shooter_id", tag.ShooterId },
+                            { "target_x", collider.GetVelocity().x },
+                            { "target_y", collider.GetVelocity().y } });
+    }
+
     json state = m_SessionOptions.ToJSON();
     state["players"] = players;
+    state["bullets"] = bullets;
     return state;
 }
 void GameServer::Stop()

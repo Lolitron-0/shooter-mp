@@ -41,11 +41,28 @@ Scene::Scene(std::unique_ptr<network::NetworkClient> networkClient)
         AddObject<Player>(id, spawnPos);
     }
 
+    for (const auto& bulletJson : gameStateJson["bullets"])
+    {
+        auto id{ bulletJson["id"].template get<IdType>() };
+        auto shooterId{ bulletJson["shooter_id"].template get<IdType>() };
+        Vector2 initialPos{
+            bulletJson["x"].template get<float>(),
+            bulletJson["y"].template get<float>(),
+        };
+        Vector2 target{
+            bulletJson["target_x"].template get<float>(),
+            bulletJson["target_y"].template get<float>(),
+        };
+        AddObject<Bullet>(id, shooterId, initialPos, target);
+    }
+
     for (const auto& wallJson : gameStateJson["walls"])
     {
         AddObject<Wall>(wallJson["id"].template get<IdType>(),
                         LineCollider{ wallJson });
     }
+
+    m_Options = SessionOptions{ gameStateJson };
 
     // dot't intercept greeting
     m_NetworkClient->Run();

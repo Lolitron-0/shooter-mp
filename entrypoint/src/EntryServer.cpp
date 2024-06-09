@@ -1,6 +1,7 @@
 #include "EntryServer.hpp"
 
-namespace smp::server {
+namespace smp::server
+{
 
 EntryServer::EntryServer(const std::string& redisHost, int32_t redisPort)
 {
@@ -119,6 +120,8 @@ void EntryServer::OnConnectionStatusChanged(
         {
             m_ServerMapMutex.lock();
 
+            // could have sorted through redis, but game won't have so much
+            // servers anyways (and redis++ doesn't have convinient interface)
             auto minPlayersIt{ m_AvailableServersMap.end() };
             int32_t minPlayerCount{ std::numeric_limits<int32_t>::max() };
 
