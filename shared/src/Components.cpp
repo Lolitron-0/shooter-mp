@@ -10,7 +10,6 @@ CircleCollider::CircleCollider(Vector2 position, float radius)
     : m_Position(position),
       m_Radius(radius)
 {
-    m_LastPosition = Vector2Add(m_Position, { 10, 10 }); // not equals
 }
 auto CircleCollider::GetPosition() const -> Vector2
 {
@@ -24,15 +23,8 @@ auto CircleCollider::GetNextPosition(float velScale) const -> Vector2
 {
     return Vector2Add(m_Position, Vector2Scale(m_Velocity, velScale));
 };
-
-auto CircleCollider::HasMoved() const -> bool
-{
-    return Vector2Equals(m_Position, m_LastPosition) == 0;
-}
-
 void CircleCollider::SetPosition(Vector2 position)
 {
-    m_LastPosition = m_Position;
     m_Position = position;
 };
 void CircleCollider::SetVelocity(Vector2 velocity)

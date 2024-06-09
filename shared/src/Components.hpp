@@ -41,7 +41,6 @@ public:
     [[nodiscard]] auto GetVelocity() const -> Vector2;
     // overload for delta time
     [[nodiscard]] auto GetNextPosition(float velScale) const -> Vector2;
-	[[nodiscard]] auto HasMoved() const -> bool;
 
     void SetPosition(Vector2 position);
     void SetVelocity(Vector2 velocity);
@@ -49,7 +48,6 @@ public:
 
 private:
     Vector2 m_Position;
-    Vector2 m_LastPosition;
     Vector2 m_Velocity{ 0, 0 };
     float m_Radius;
 };

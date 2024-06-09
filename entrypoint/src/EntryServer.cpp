@@ -67,7 +67,7 @@ EntryServer::EntryServer(const std::string& redisHost, int32_t redisPort)
                         std::cerr << error.what() << std::endl;
                     }
 
-                    std::this_thread::sleep_for(std::chrono::seconds{ 1 });
+                    std::this_thread::sleep_for(std::chrono::milliseconds{ 300 });
                 }
             });
     }
@@ -136,9 +136,6 @@ void EntryServer::OnConnectionStatusChanged(
                 m_AvailableServersMap.begin(), m_AvailableServersMap.end(),
                 [](auto a, auto b)
                 {
-                    std::cout
-                        << (a.second["player_count"].template get<int32_t>() <
-                            b.second["player_count"].template get<int32_t>());
                     return a.second["player_count"].template get<int32_t>() <
                            b.second["player_count"].template get<int32_t>();
                 }) };

@@ -138,10 +138,10 @@ void NetworkClient::SendMovement(IdType playerId, Vector2 nextPlayerCoords)
     // not quite thread safe, but we are in one thread for now
     static Vector2 lastPos{ nextPlayerCoords };
 
-    // if (Vector2Equals(lastPos, nextPlayerCoords) != 0)
-    // {
-    //     return;
-    // }
+    if (Vector2Equals(lastPos, nextPlayerCoords) != 0)
+    {
+        return;
+    }
 
     lastPos = nextPlayerCoords;
 

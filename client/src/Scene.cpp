@@ -23,7 +23,10 @@ Scene::Scene(std::unique_ptr<network::NetworkClient> networkClient)
 
     m_NetworkClient->SetMessageCallback(
         [this](json&& message)
-        { m_MessageQueue.push_back(std::move(message)); });
+        {
+            std::scoped_lock<std::mutex> mtxLock{ m_MQMutex };
+            m_MessageQueue.push_back(std::move(message));
+        });
 
     json gameStateJson = gameStateFuture.get();
     std::cout << gameStateJson << std::endl;
@@ -111,6 +114,8 @@ void Scene::Draw() const
 
 void Scene::ProcessMessages()
 {
+    std::scoped_lock<std::mutex> mtxLock{ m_MQMutex };
+
     for (auto it{ m_MessageQueue.begin() }; it != m_MessageQueue.end();)
     {
         if (this->ProcessIncomingMessage(*it))

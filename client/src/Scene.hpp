@@ -79,11 +79,14 @@ private:
 
     ObjectsContainer m_Objects;
     std::shared_ptr<Registry> m_Registry;
+
     SessionOptions m_Options;
     Player* m_MainPlayer{ nullptr };
     // since we are using unordered_map, they won't invalidate
     std::vector<IdType> m_MarkedForDeletion;
+
     std::list<nlohmann::json> m_MessageQueue;
+	std::mutex m_MQMutex;
 };
 
 } // namespace smp::game
