@@ -8,4 +8,4 @@ sudo cmake  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug -DCANVAS_
 sudo cmake --build build --parallel 5 
 
 cp build/compile_commands.json ./compile_commands.json 
-./build/client/shooter-client
+./build/client/shooter-client ${@:1}

@@ -23,8 +23,6 @@ Scene::Scene(std::unique_ptr<network::NetworkClient> networkClient)
     m_NetworkClient->SetMessageCallback(
         [this](json&& message)
         { m_MessageQueue.push_front(std::move(message)); });
-    // m_NetworkClient->SetMessageCallback(
-    //     [this](json&& message) { this->ProcessIncomingMessage(message); });
 
     json gameStateJson = gameStateFuture.get();
     std::cout << gameStateJson << std::endl;

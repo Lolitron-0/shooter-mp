@@ -408,5 +408,10 @@
   "directory": "/home/niten/dev/shooter-mp/build",
   "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -g -I/usr/local/include -std=gnu++20 -o entrypoint/CMakeFiles/shooter-entrypoint.dir/src/main.cpp.o -c /home/niten/dev/shooter-mp/entrypoint/src/main.cpp",
   "file": "/home/niten/dev/shooter-mp/entrypoint/src/main.cpp"
+},
+{
+  "directory": "/home/niten/dev/shooter-mp/build",
+  "command": "/usr/bin/c++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DLINUX -DSTEAMNETWORKINGSOCKETS_STATIC_LINK -I/home/niten/dev/shooter-mp/shared/src -I/home/niten/dev/shooter-mp/thirdparty/json/include -I/home/niten/dev/shooter-mp/thirdparty/GameNetworkingSockets/src/../include -g -I/usr/local/include -std=gnu++20 -o entrypoint/CMakeFiles/shooter-entrypoint.dir/src/EntryServer.cpp.o -c /home/niten/dev/shooter-mp/entrypoint/src/EntryServer.cpp",
+  "file": "/home/niten/dev/shooter-mp/entrypoint/src/EntryServer.cpp"
 }
 ]

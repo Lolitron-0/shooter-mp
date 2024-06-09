@@ -1,9 +1,6 @@
 #include "GameServer.hpp"
 #include "SessionOptions.hpp"
 #include <boost/program_options.hpp>
-#include <boost/program_options/detail/parsers.hpp>
-#include <boost/program_options/value_semantic.hpp>
-#include <boost/program_options/variables_map.hpp>
 #include <cmath>
 #include <csignal>
 #include <cstdlib>
@@ -75,8 +72,17 @@ auto main(int argc, char** argv) -> int
     // clang-format on
 
     opts::variables_map vm;
-    opts::store(opts::parse_command_line(argc, argv, optsDescription), vm);
-    opts::notify(vm);
+    try
+    {
+        opts::store(opts::parse_command_line(argc, argv, optsDescription), vm);
+        opts::notify(vm);
+    }
+    catch (const opts::required_option& e)
+    {
+        std::cout << optsDescription << std::endl;
+        std::cout << e.what() << std::endl;
+        return 0;
+    }
 
     if (vm.count("help"))
     {

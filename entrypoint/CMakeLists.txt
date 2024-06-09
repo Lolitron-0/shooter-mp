@@ -1,6 +1,6 @@
 project(shooter-entrypoint)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/EntryServer.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE shooter-shared)
 

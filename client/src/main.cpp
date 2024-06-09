@@ -4,6 +4,7 @@
 #include "SessionOptions.hpp"
 #include "Wall.hpp"
 #include "steam/steamnetworkingtypes.h"
+#include <boost/program_options.hpp>
 #include <cassert>
 #include <cstdint>
 #include <memory>
@@ -22,7 +23,7 @@ static void DebugOutput(ESteamNetworkingSocketsDebugOutputType eType,
     }
 }
 
-auto main() -> int
+auto main(int argc, char** argv) -> int
 {
     SteamDatagramErrMsg errMsg;
     if (!GameNetworkingSockets_Init(nullptr, errMsg))
@@ -32,8 +33,38 @@ auto main() -> int
     SteamNetworkingUtils()->SetDebugOutputFunction(
         k_ESteamNetworkingSocketsDebugOutputType_Msg, DebugOutput);
 
+    namespace opts = boost::program_options;
+    std::string entryPointAddr;
+    opts::options_description optsDescription{ "Allowed opitons" };
+    // clang-format off
+    optsDescription.add_options()
+		("help,h", "display help")
+		("entry,e", 
+		 opts::value<std::string>(&entryPointAddr)->required(),
+		 "entry point address");
+    // clang-format on
+
+    opts::variables_map vm;
+    try
+    {
+        opts::store(opts::parse_command_line(argc, argv, optsDescription), vm);
+        opts::notify(vm);
+    }
+    catch (const opts::required_option& e)
+    {
+        std::cout << optsDescription << std::endl;
+        std::cout << e.what() << std::endl;
+        return 0;
+    }
+
+    if (vm.count("help"))
+    {
+        std::cout << optsDescription << std::endl;
+        return 0;
+    }
+
     auto networkClient{ std::make_unique<smp::network::NetworkClient>() };
-    networkClient->FindFreeRoom("127.0.0.1:32232");
+    networkClient->FindFreeRoom(entryPointAddr);
 
     smp::game::Scene scene{ std::move(networkClient) };
 
