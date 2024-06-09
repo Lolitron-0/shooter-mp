@@ -6,3 +6,12 @@ mkdir build && cd build
 cmake -DBUILD_SHARED_LIBS=ON ..
 make
 sudo make install
+
+git clone https://github.com/sewenew/redis-plus-plus.git
+cd redis-plus-plus
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+cd ..
